@@ -1,0 +1,4 @@
+mkdir cypress-saucedemo && cd cypress-saucedemo
+npm init -y
+npm install cypress --save-dev
+npx cypress open
