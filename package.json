@@ -1,0 +1,22 @@
+{
+  "name": "qa_automation",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000C\u0000y\u0000p\u0000r\u0000e\u0000s\u0000s\u0000_\u0000T\u0000e\u0000s\u0000t\u0000i\u0000n\u0000g\u0000\r\u0000 \u0000",
+  "main": "cypress.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/verdo-daviarta/Cypress_Testing.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/verdo-daviarta/Cypress_Testing/issues"
+  },
+  "homepage": "https://github.com/verdo-daviarta/Cypress_Testing#readme",
+  "devDependencies": {
+    "cypress": "^15.21.0"
+  }
+}
