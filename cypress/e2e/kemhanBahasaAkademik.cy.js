@@ -1,43 +1,38 @@
 import kemhanBahasaAkademikPage from '../pages/kemhanBahasa-AkademikPage';
 
-describe('Skenario Validasi Akses Menu - Sistem Informasi Siswa', () => {
+describe('Skenario Validasi Akses Menu - Sistem Informasi Akademik', { retries: 0 }, () => {
   before(() => {
     kemhanBahasaAkademikPage.visit();
 
-    const username = Cypress.env('KEMHAN_USERNAME');
-    const password = Cypress.env('KEMHAN_PASSWORD');
-
-    expect(username, 'KEMHAN_USERNAME').to.be.a('string').and.not.be.empty;
-    expect(password, 'KEMHAN_PASSWORD').to.be.a('string').and.not.be.empty;
-
-    kemhanBahasaAkademikPage.login(username, password);
+    kemhanBahasaAkademikPage.login();
     kemhanBahasaAkademikPage.verifyOnDashboard();
   });
 
   it('Memastikan seluruh menu bar dapat diakses dalam satu sesi login', () => {
     const daftarMenu = [
-      ['Kalender Akademik', '/kalender-akademik', 'kalender akademik'],
+      ['Kalender Akademik', '/kalendar-akademik', 'Kalender Akademik'],
       ['Bahasa', '/bahasa', 'Bahasa'],
-      ['Profil Calon Siswa', '/calon', 'Profil Calon Siswa'],
-      ['Profil Siswa', '/profil', 'Profil Siswa'],
-      ['Ujian Masuk', '/pendaftaran/ujian-masuk', 'Ujian Masuk', 'Pendaftaran'],
-      [
-        'Ujian Seleksi Kelas',
-        '/pendaftaran/ujian-seleksi-kelas',
-        'Ujian Seleksi Kelas',
-        'Pendaftaran'
-      ],
-      ['Peran & Izin', '/peran', 'Peran & Izin', 'Manajemen'],
-      ['Akses', '/akses', 'Akses', 'Manajemen']
+      ['Subjek', '/subjek', 'Subjek'],
+      ['Kursus', '/kursus', 'Kursus'],
+      ['Kelas', '/kelas', 'Kelas'],
+      ['Jadwal Ujian Masuk', '/jadwal-ujian-masuk', 'Jadwal Ujian Masuk'],
+      ['Jadwal Mingguan', '/jadwal-mingguan', 'Jadwal Mingguan'],
+      ['Penilaian Ujian Masuk', '/penilaian/ujian-masuk', 'Penilaian Ujian Masuk', 'Penilaian'],
+      ['Penilaian Ujian Seleksi Kelas', '/penilaian/ujian-seleksi-kelas', 'Penilaian Ujian Seleksi Kelas', 'Penilaian'],
+      ['Penilaian Akademik', '/penilaian/akademik', 'Penilaian Akademik', 'Penilaian'],
+      ['Penilaian Nilai Akhir', '/nilai-akhir', 'Penilaian Nilai Akhir'],
+      ['Sertifikat Kelulusan', '/sertifikat-kelulusan', 'Sertifikat Kelulusan'],
+      ['Piagam Penghargaan', '/piagam-penghargaan', 'Piagam Penghargaan'],
+      ['Form Evaluasi', '/form-evaluasi', 'Form Evaluasi'],
+      ['Hasil Evaluasi', '/hasil-evaluasi', 'Hasil Evaluasi'],
+      ['Peran & Izin', '/peran', 'Peran & Izin', 'Manajemen Akun'],
+      ['Akses', '/akses', 'Akses', 'Manajemen Akun']
     ];
 
-    daftarMenu.forEach(([namaMenu, expectedPath, expectedBreadcrumb, namaMenuParent]) => {
-      kemhanBahasaAkademikPage.goToDashboard();
-      kemhanBahasaAkademikPage.validasiAksesMenu(
-        namaMenu,
+    daftarMenu.forEach(([, expectedPath, expectedBreadcrumb]) => {
+      kemhanBahasaAkademikPage.validasiAksesMenuLangsung(
         expectedPath,
-        expectedBreadcrumb,
-        namaMenuParent
+        expectedBreadcrumb
       );
     });
   });

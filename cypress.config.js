@@ -10,6 +10,7 @@ module.exports = defineConfig({
 
   e2e: {
     supportFile: false,
+    injectDocumentDomain: true,
     setupNodeEvents(on, config) {
       // Tempat untuk menginisialisasi plugin (misal: Cypress Mochawesome Reporter)
       return config;
