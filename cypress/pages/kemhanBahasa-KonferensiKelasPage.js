@@ -1,6 +1,6 @@
-class KemhanBahasaAlumniPage {
+class KemhanBahasaKonferensiKelasPage {
   visit() {
-    cy.visit('https://alumni-ba.kemhan.go.id');
+    cy.visit('https://konferensi-badiklat.kemhan.go.id/');
   }
 
   login() {
@@ -9,7 +9,7 @@ class KemhanBahasaAlumniPage {
 
     expect(username, 'KEMHAN_USERNAME').to.be.a('string').and.not.be.empty;
     expect(password, 'KEMHAN_PASSWORD').to.be.a('string').and.not.be.empty;
-    
+
     cy.get('input[name="username"]', { timeout: 20000 })
       .should('be.visible')
       .clear()
@@ -21,20 +21,20 @@ class KemhanBahasaAlumniPage {
       .type(password);
 
     cy.get('form').invoke('removeAttr', 'onsubmit');
-    cy.contains('button', 'Login', { timeout: 20000 })
+    cy.contains('button', 'Sign In', { timeout: 20000 })
       .should('be.visible')
       .invoke('click');
   }
 
   verifyOnDashboard() {
-    cy.url({ timeout: 20000 }).should('include', '/dasbor');
-    cy.get('main', { timeout: 20000 })
+    cy.url({ timeout: 20000 }).should('include', '');
+    cy.get('.capitalize', { timeout: 20000 })
       .should('be.visible')
-      .and('contain.text', 'Selamat datang di Sistem Informasi Alumni');
+      .and('contain.text', 'Beranda');
   }
 
   goToDashboard() {
-    this.sidebarMenu('Dashboard')
+    this.sidebarMenu('Beranda')
       .filter(':visible')
       .first()
       .should('be.visible')
@@ -43,7 +43,7 @@ class KemhanBahasaAlumniPage {
   }
 
   validasiAksesMenuLangsung(expectedPath, expectedBreadcrumb) {
-    cy.visit(`https://alumni-ba.kemhan.go.id${expectedPath}`);
+    cy.visit(`https://konferensi-badiklat.kemhan.go.id${expectedPath}`);
     cy.url({ timeout: 20000 }).should('include', expectedPath);
     cy.get('main', { timeout: 20000 })
       .should('be.visible')
@@ -101,4 +101,4 @@ class KemhanBahasaAlumniPage {
   }
 }
 
-export default new KemhanBahasaAlumniPage();
+export default new KemhanBahasaKonferensiKelasPage();
