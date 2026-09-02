@@ -10,7 +10,7 @@ describe('Skenario Validasi Akses Menu - Sistem Informasi Akademik', { retries: 
 
   it('Memastikan seluruh menu bar dapat diakses dalam satu sesi login', () => {
     const daftarMenu = [
-      ['Kalender Akademik', '/kalendar-akademik', 'Kalender Akademik'],
+      ['Kalender Akademik', '/kalender-akademik', 'Kalender Akademik'],
       ['Bahasa', '/bahasa', 'Bahasa'],
       ['Subjek', '/subjek', 'Subjek'],
       ['Kursus', '/kursus', 'Kursus'],
