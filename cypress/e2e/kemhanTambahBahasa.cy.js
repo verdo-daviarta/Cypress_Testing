@@ -5,7 +5,7 @@ describe('Skenario Tambah Bahasa - Sistem Informasi Akademik', { retries: 0 }, (
     bahasaTambahBahasaPage.login();
   });
 
-  it('mengisi nama dan memilih tipe bahasa pada formulir Tambah Bahasa', () => {
+  it('Mengisi nama dan memilih tipe Bahasa pada formulir Tambah Bahasa', () => {
     const namaBahasa = 'Bahasa Uji';
 
     bahasaTambahBahasaPage.aksesMenuBahasa();
