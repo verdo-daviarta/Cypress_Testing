@@ -1,4 +1,4 @@
-class BahasaTambahAspekPage {
+class BahasaTambahAngkatanPage {
   login() {
     cy.visit('https://akademik-ba.kemhan.go.id/');
 
@@ -36,7 +36,7 @@ class BahasaTambahAspekPage {
   }
 
   aksesMenuKursus() {
-    cy.get('aside a, aside button, aside [data-sidebar="menu-button"]', { timeout: 50000 })
+    cy.get('aside a, aside button, aside [data-sidebar="menu-button"]', { timeout: 60000 })
       .filter(':visible')
       .then(($menuItems) => {
         const menuKursus = [...$menuItems].find((menuItem) =>
@@ -53,7 +53,7 @@ class BahasaTambahAspekPage {
       .and('contain.text', 'Kursus');
   }
 
-  lihatAspek(namaKursus, namaBahasa) {
+  lihatAngkatan(namaKursus, namaBahasa) {
     const cocokDenganKursusDanBahasa = (row) => {
       const kolom = row.querySelectorAll('td');
       const kursus = kolom[1]?.innerText.replace(/\s+/g, ' ').trim();
@@ -75,114 +75,91 @@ class BahasaTambahAspekPage {
         const barisKursus = [...$rows].find(cocokDenganKursusDanBahasa);
 
         cy.wrap(barisKursus)
-          .find('a[href^="/kursus/"][href$="/aspek"]')
+          .find('a[href^="/kursus/"][href$="/angkatan"]')
           .should('have.length', 1)
           .and('be.visible')
           .click();
       });
 
     cy.location('pathname', { timeout: 20000 })
-      .should('match', /^\/kursus\/\d+\/aspek$/);
+      .should('match', /^\/kursus\/\d+\/angkatan$/);
   }
 
-  tambahAspek() {
-    cy.get('main a[href^="/kursus/"][href$="/aspek/tambah"]', { timeout: 20000 })
+  tambahAngkatan() {
+    cy.contains('main button', /Tambah/, { timeout: 20000 })
       .should('have.length', 1)
       .and('be.visible')
       .click();
 
-    this.namaAspekInput().should('be.visible');
+    this.namaAngkatanInput().should('be.visible');
   }
 
-  inputNamaAspek(namaAspek) {
-    this.namaAspekInput()
+  namaAngkatanInput() {
+    return cy.get('[role="dialog"] input[name="name"]', { timeout: 20000 });
+  }
+
+  inputTanggalMulai(tanggalMulai) {
+    this.pilihTanggal('openDate', tanggalMulai);
+  }
+
+  inputTanggalAkhir(tanggalAkhir) {
+    this.pilihTanggal('closeDate', tanggalAkhir);
+  }
+
+  // Nilai tanggal dari skenario menggunakan format YYYY-MM-DD.
+  pilihTanggal(fieldId, tanggal) {
+    expect(tanggal, 'tanggal dalam format YYYY-MM-DD')
+      .to.match(/^\d{4}-\d{2}-\d{2}$/);
+    const [tahun, bulan, hari] = tanggal.split('-').map(Number);
+    const date = new Date(tahun, bulan - 1, hari);
+    expect(
+      date.getFullYear() === tahun &&
+      date.getMonth() === bulan - 1 &&
+      date.getDate() === hari,
+      `tanggal valid: ${tanggal}`
+    ).to.eq(true);
+
+    const trigger = `button[id="${fieldId}"]`;
+    cy.get(trigger).should('be.visible').click();
+    // Native select kalender transparan (opacity: 0), tetapi tetap dapat dipilih.
+    cy.get('select[aria-label="Choose the Year"]')
+      .should('have.length', 1)
+      .and('not.be.disabled')
+      .select(String(tahun));
+    cy.get('select[aria-label="Choose the Year"]')
+      .should('have.value', String(tahun));
+    cy.get('select[aria-label="Choose the Month"]')
+      .should('have.length', 1)
+      .and('not.be.disabled')
+      .select(String(bulan - 1));
+    cy.get('select[aria-label="Choose the Month"]')
+      .should('have.value', String(bulan - 1));
+    // Sel kalender memakai ISO; data-day pada tombol mengikuti locale browser.
+    cy.get(`[role="gridcell"][data-day="${tanggal}"]`)
+      .should('have.length', 1)
+      .find('button')
+      .should('have.length', 1)
+      .and('be.visible')
+      .and('not.be.disabled')
+      .click();
+
+    const tanggalTampil = `${String(hari).padStart(2, '0')}/${String(bulan).padStart(2, '0')}/${tahun}`;
+    cy.get(trigger).should('have.text', tanggalTampil);
+  }
+  inputNamaAngkatan(namaAngkatan) {
+    this.namaAngkatanInput()
       .should('be.visible')
       .clear()
-      .type(namaAspek)
-      .should('have.value', namaAspek);
+      .type(namaAngkatan)
+      .should('have.value', namaAngkatan);
   }
-
-  inputJumlahBobot(jumlahBobot) {
-    cy.get('main input[name="weight"]', { timeout: 20000 })
-      .should('have.length', 1)
-      .and('be.visible')
-      .clear()
-      .type(String(jumlahBobot))
-      .should('have.value', String(jumlahBobot));
-  }
-
-  tambahBarisSubjek() {
-    cy.contains('main button[type="button"]', /Add/, { timeout: 20000 })
+  
+  simpanAngkatan() {
+    cy.contains('[role="dialog"] button', /^Simpan$/, { timeout: 20000 })
       .should('have.length', 1)
       .and('be.visible')
       .click();
-
-    this.bobotSubjekInput().should('be.visible');
-  }
-
-  pilihSubjek(namaSubjek) {
-    this.subjekDropdown()
-      .should('be.visible')
-      .click();
-
-    cy.get('input[data-slot="command-input"][placeholder="Cari Subjek"]', {
-      timeout: 20000,
-    })
-      .filter(':visible')
-      .should('have.length', 1)
-      .clear()
-      .type(namaSubjek);
-
-    cy.get('[role="option"][data-slot="command-item"]', { timeout: 20000 })
-      .filter((_, option) => option.innerText.trim() === namaSubjek)
-      .should('have.length', 1)
-      .scrollIntoView()
-      .click();
-
-    this.subjekDropdown()
-      .should('contain.text', namaSubjek);
-  }
-
-  inputBobotSubjek(bobotSubjek) {
-    this.bobotSubjekInput()
-      .should('be.visible')
-      .clear()
-      .type(String(bobotSubjek))
-      .should('have.value', String(bobotSubjek));
-  }
-
-  inputTotalJP(totalJP) {
-    cy.get('main input[name="subjects[0].numJp"]', { timeout: 20000 })
-      .should('have.length', 1)
-      .and('be.visible')
-      .clear()
-      .type(String(totalJP))
-      .should('have.value', String(totalJP));
-  }
-
-  simpanAspek() {
-    cy.contains('main button', /^Simpan$/, { timeout: 20000 })
-      .should('have.length', 1)
-      .and('be.visible')
-      .click();
-  }
-
-  namaAspekInput() {
-    return cy.get('main input[name="name"]', { timeout: 20000 })
-      .should('have.length', 1);
-  }
-
-  bobotSubjekInput() {
-    return cy.get('main input[name="subjects[0].numHn"]', { timeout: 20000 })
-      .should('have.length', 1);
-  }
-
-  subjekDropdown() {
-    return this.bobotSubjekInput()
-      .closest('tr')
-      .find('button[role="combobox"][data-slot="popover-trigger"]')
-      .should('have.length', 1);
   }
 }
 
-export default new BahasaTambahAspekPage();
+export default new BahasaTambahAngkatanPage();
