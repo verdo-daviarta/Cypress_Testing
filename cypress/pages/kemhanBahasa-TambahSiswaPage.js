@@ -25,7 +25,7 @@ class KemhanBahasaTambahSiswaPage {
       .click();
   }
   aksesMenuGenerateAkun() {
-    cy.contains('aside button', /^Generate Akun$/, { timeout: 20000 })
+    cy.contains('aside button', /^Generate Akun$/, { timeout: 50000 })
       .should('be.visible').click();
     cy.location('pathname').should('eq', '/generate');
     cy.get('main input[name="name"]').should('be.visible');

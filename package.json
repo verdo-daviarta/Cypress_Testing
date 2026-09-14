@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/verdo-daviarta/Cypress_Testing#readme",
   "devDependencies": {
-    "cypress": "^15.21.0"
+    "cypress": "^15.21.0",
+    "exceljs": "^4.4.0"
   }
 }

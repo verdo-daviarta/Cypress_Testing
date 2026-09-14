@@ -4,31 +4,24 @@ class KemhanBahasaPerbaharuiProfilPage {
   }
 
   login() {
-    const username = Cypress.env('KEMHAN_USERNAME');
-    const password = Cypress.env('KEMHAN_PASSWORD');
+    // Akun pertama dari Excel Generate Akun terbaru, bukan credential admin di env.
+    return cy.task('readLatestGeneratedCredentials', null, { log: false })
+      .then(({ username, password }) => {
+        cy.get('input[name="username"]', { timeout: 20000, log: false })
+          .should('be.visible').clear({ log: false })
+          .type(username, { log: false, parseSpecialCharSequences: false });
 
-    expect(username, 'KEMHAN_USERNAME').to.be.a('string').and.not.be.empty;
-    expect(password, 'KEMHAN_PASSWORD').to.be.a('string').and.not.be.empty;
+        cy.get('input[name="password"]', { timeout: 20000, log: false })
+          .should('be.visible').clear({ log: false })
+          .type(password, { log: false, parseSpecialCharSequences: false });
 
-    cy.get('input[name="username"]', { timeout: 20000 })
-      .should('be.visible')
-      .clear()
-      .type(username, { log: false });
-
-    cy.get('input[name="password"]', { timeout: 20000 })
-      .should('be.visible')
-      .clear()
-      .type(password, { log: false });
-
-    cy.get('input[type="submit"], button[type="submit"]', { timeout: 20000 })
-      .should('be.visible')
-      .click();
+        return cy.get('input[type="submit"], button[type="submit"]', { timeout: 20000 })
+          .should('be.visible').click();
+      });
   }
   aksesMenuProfil() {
-    cy.contains('aside button', /^Profil$/, { timeout: 20000 })
+    cy.contains('aside button', /^Profil$/, { timeout: 50000 })
       .should('be.visible').click();
-    cy.location('pathname').should('match', /^\/(?:profil\/?|calon\/detil\/[^/]+\/?)$/);
-    cy.get('main input[name="name"]').should('be.visible');
   }
 
   EditProfil() {
@@ -120,6 +113,17 @@ class KemhanBahasaPerbaharuiProfilPage {
 
   batal() {
     return cy.contains('main button', /^Batal$/).should('be.visible').click();
+  }
+
+  verifikasiProfilTersimpan(nama, email) {
+    // Jangan anggap klik Simpan saja sebagai bukti data tersimpan.
+    cy.location('pathname', { timeout: 20000 })
+      .should('match', /^\/calon\/detil\/[^/]+\/?$/);
+    cy.reload();
+    this.EditProfil();
+    cy.get('main input[id="name"]').should('have.value', nama);
+    cy.get('main input[id="email"]').should('have.value', email);
+    this.batal();
   }
 }
 

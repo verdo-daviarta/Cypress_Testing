@@ -2,8 +2,8 @@ const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
   projectId: '151qby',
-  downloadsFolder: 'C:/Users/Personal/Downloads',
-  // Folder pribadi: jangan hapus file saat cypress run dimulai.
+  downloadsFolder: 'cypress/downloads',
+  // Pertahankan hasil download sebelumnya saat cypress run dimulai.
   trashAssetsBeforeRuns: false,
   // Konfigurasi global
   viewportWidth: 1280,
@@ -17,7 +17,12 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       const path = require('node:path');
       const generateDownloads = require('./cypress/tasks/generateDownloads');
-      on('task', generateDownloads(path.resolve(config.projectRoot, config.downloadsFolder)));
+      const generatedCredentials = require('./cypress/tasks/generatedCredentials');
+      const downloadsFolder = path.resolve(config.projectRoot, config.downloadsFolder);
+      on('task', {
+        ...generateDownloads(downloadsFolder),
+        ...generatedCredentials(downloadsFolder),
+      });
       // Tempat untuk menginisialisasi plugin (misal: Cypress Mochawesome Reporter)
       return config;
     },

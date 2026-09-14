@@ -8,7 +8,7 @@ describe('Skenario Tambah Siswa - Generate Akun', { retries: 0 }, () => {
 
   it('Generate akun siswa dan menyimpan dokumen hasil download', () => {
     // Prefix 6 karakter + timestamp 13 karakter = 19 karakter.
-    const namaSiswa = `Cy_${Date.now()}`;
+    const namaSiswa = `Ver_${Date.now()}`;
     const jumlahAkun = 1;
     const tipeSiswa = 'Nasional'; // Internasional / Nasional / DIKLN
 
