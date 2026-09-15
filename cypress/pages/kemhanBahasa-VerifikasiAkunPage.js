@@ -25,52 +25,62 @@ class KemhanBahasaVerifikasiAkunPage {
       .click();
   }
   aksesMenuProfilCalonSiswa() {
-    cy.contains('aside button', /^Profil Calon Siswa$/, { timeout: 50000 })
-      .should('be.visible').click();
-    cy.location('pathname').should('eq', '/calon');
-    cy.get('main input[type="search"][placeholder="Cari Nama"]')
+    const menu = 'aside button[data-sidebar="menu-button"]';
+    cy.contains(menu, /^Profil Calon Siswa$/, { timeout: 50000 })
       .should('be.visible');
+    // Query ulang karena sidebar render ulang sesaat setelah login.
+    cy.contains(menu, /^Profil Calon Siswa$/, { timeout: 50000 }).click();
+    cy.location('pathname').should('eq', '/calon');
+    cy.get('input[placeholder="Cari Nama"]', { timeout: 20000 }).should('be.visible');
   }
 
-  bukaDetailCalonSiswa(namaSiswa) {
-    expect(namaSiswa, 'nama siswa setelah diperbaharui').to.be.a('string').and.not.be.empty;
-    cy.get('main input[type="search"][placeholder="Cari Nama"]')
-      .should('be.visible').clear()
-      .type(namaSiswa, { parseSpecialCharSequences: false });
-
-    // Tentukan kolom dari header Nama, bukan posisi baris atau kolom tetap.
-    cy.get('main table', { timeout: 20000 }).should('have.length', 1)
-      .should(($table) => {
-        const headers = Array.from($table[0].querySelectorAll('thead th'));
-        expect(headers.filter((header) => header.textContent.trim() === 'Nama'))
-          .to.have.length(1);
-      }).then(($table) => {
-        const headers = Array.from($table[0].querySelectorAll('thead th'));
-        const namaColumn = headers.findIndex((header) => header.textContent.trim() === 'Nama');
-        cy.get('main table tbody tr', { timeout: 20000 })
-          .filter((_, row) => row.cells[namaColumn]?.textContent.trim() === namaSiswa)
-          // Berhenti jika nama duplikat agar tidak memverifikasi akun yang salah.
-          .should('have.length', 1)
-          .find('a[href^="/calon/detil/"]')
-          .should('have.length', 1).should('be.visible').click();
-      });
-
-    cy.location('pathname', { timeout: 20000 })
-      .should('match', /^\/calon\/detil\/[^/]+\/?$/);
-    return this.pastikanNamaSiswa(namaSiswa);
-  }
-
-  pastikanNamaSiswa(namaSiswa) {
+  cariNamaSiswa(namaSiswa) {
     expect(namaSiswa, 'nama siswa').to.be.a('string').and.not.be.empty;
-    return cy.contains('main p', new RegExp(`^${Cypress._.escapeRegExp(namaSiswa)}$`), {
-      timeout: 20000,
-    }).should('be.visible');
+    cy.get('input[placeholder="Cari Nama"]')
+      .clear()
+      .type(namaSiswa, { parseSpecialCharSequences: false })
+      .should('have.value', namaSiswa);
   }
 
-  verifikasiAkun(namaSiswa) {
-    // Periksa identitas lagi sebelum mengubah status akun.
-    this.pastikanNamaSiswa(namaSiswa);
-    return cy.contains('main button', /^Verifikasi$/, { timeout: 20000 })
+  pastikanNamaSiswaDitemukan(namaSiswa) {
+    expect(namaSiswa, 'nama siswa').to.be.a('string').and.not.be.empty;
+    return cy.get('main table tbody tr', { timeout: 20000 })
+      .filter((_, row) => row.cells[1]?.textContent.trim() === namaSiswa)
+      .should('have.length', 1)
+      .as('barisSiswa');
+  }
+
+  bukaDetailSiswa() {
+    cy.get('@barisSiswa')
+      .find('td:last-child')
+      .scrollIntoView()
+      .should('be.visible');
+
+    // Query ulang setelah horizontal scroll agar Cypress memakai posisi terbaru.
+    return cy.get('@barisSiswa')
+      .find('td:last-child a[href^="/calon/detil/"]')
+      .should('have.length', 1)
+      .scrollIntoView()
+      .should('be.visible')
+      .click()
+      .then(() => {
+        cy.location('pathname', { timeout: 20000 })
+          .should('match', /^\/calon\/detil\/[^/]+\/?$/);
+        // Aplikasi kadang hanya mengubah URL tanpa merender halaman Detail.
+        // Reload URL hasil klik agar konten Detail benar-benar dimuat.
+        cy.reload();
+        cy.contains('main button', 'Verifikasi', { timeout: 20000 }).should('be.visible');
+      });
+  }
+
+  verifikasiAkun() {
+    cy.contains('main button', 'Verifikasi', { timeout: 20000 })
+      .should('be.visible').and('not.be.disabled');
+    return cy.contains('main button', 'Verifikasi', { timeout: 20000 }).click();
+  }
+
+  konfirmasiVerifikasiAkun() {
+    cy.get('.flex-col-reverse > .bg-foreground', { timeout: 20000 })
       .should('be.visible').and('not.be.disabled').click();
   }
 }

@@ -3,12 +3,24 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const ExcelJS = require('exceljs');
 const tasks = require('./generatedCredentials');
 
 function tempFolder(t) {
   const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'generated-credentials-'));
   t.after(() => fs.rmSync(folder, { recursive: true, force: true }));
   return folder;
+}
+
+async function writeGeneratedAccount(folder, fileName, namaSiswa, modifiedTime) {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Akun');
+  sheet.addRow(['No', 'Nama', 'Username', 'Password']);
+  sheet.addRow([1, namaSiswa, `${namaSiswa}-user`, 'test-password']);
+  const file = path.join(folder, fileName);
+  await workbook.xlsx.writeFile(file);
+  fs.utimesSync(file, modifiedTime, modifiedTime);
+  return file;
 }
 
 test('folder tidak tersedia memberi pesan yang jelas', async (t) => {
@@ -50,4 +62,31 @@ test('tolak dua file dengan waktu terbaru identik', async (t) => {
     fs.utimesSync(file, 100, 100);
   }
   await assert.rejects(tasks(folder).readLatestGeneratedCredentials(), /waktu terbaru yang sama/);
+});
+
+test('baca nama siswa dari akun pertama file Excel terbaru', async (t) => {
+  const folder = tempFolder(t);
+  await writeGeneratedAccount(folder, 'DAFTAR GENERATE AKUN TEST.xlsx', 'Siswa Baru 001', 100);
+  const result = await tasks(folder).readLatestGeneratedCredentials();
+  assert.equal(result.name, 'Siswa Baru 001');
+  assert.equal(result.sourceFile, 'DAFTAR GENERATE AKUN TEST.xlsx');
+});
+
+test('nama profil hanya berlaku untuk file Generate Akun sumber yang sama', async (t) => {
+  const folder = tempFolder(t);
+  await writeGeneratedAccount(folder, 'DAFTAR GENERATE AKUN LAMA.xlsx', 'Siswa Lama', 100);
+  const generatedTasks = tasks(folder);
+  const source = await generatedTasks.readLatestGeneratedCredentials();
+  assert.equal(generatedTasks.saveLatestUpdatedStudent({
+    namaSiswa: source.name,
+    sourceFile: source.sourceFile,
+    sourceModified: source.sourceModified,
+  }), true);
+  assert.equal(generatedTasks.readLatestUpdatedStudentName(), 'Siswa Lama');
+
+  await writeGeneratedAccount(folder, 'DAFTAR GENERATE AKUN BARU.xlsx', 'Siswa Baru', 200);
+  assert.throws(
+    () => generatedTasks.readLatestUpdatedStudentName(),
+    /Ada hasil Generate Akun yang lebih baru/,
+  );
 });

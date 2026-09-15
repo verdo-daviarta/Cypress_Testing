@@ -1,5 +1,4 @@
 import verifikasiAkunPage from '../pages/kemhanBahasa-VerifikasiAkunPage';
-import { namaSiswa } from '../fixtures/profilSiswa.json';
 
 describe('Skenario Verifikasi Siswa oleh Admin', { retries: 0 }, () => {
   beforeEach(() => {
@@ -12,8 +11,13 @@ describe('Skenario Verifikasi Siswa oleh Admin', { retries: 0 }, () => {
     // Nama berasal dari data bersama dengan skenario Perbaharui Profil.
     // Prasyarat: profil sudah diajukan dan belum terverifikasi.
 
-    verifikasiAkunPage.aksesMenuProfilCalonSiswa();
-    verifikasiAkunPage.bukaDetailCalonSiswa(namaSiswa);
-    verifikasiAkunPage.verifikasiAkun(namaSiswa);
+    cy.task('readLatestUpdatedStudentName', null, { log: false }).then((namaSiswa) => {
+      verifikasiAkunPage.aksesMenuProfilCalonSiswa();
+      verifikasiAkunPage.cariNamaSiswa(namaSiswa);
+      verifikasiAkunPage.pastikanNamaSiswaDitemukan(namaSiswa);
+      verifikasiAkunPage.bukaDetailSiswa();
+      verifikasiAkunPage.verifikasiAkun();
+      verifikasiAkunPage.konfirmasiVerifikasiAkun();
+    });
   });
 });

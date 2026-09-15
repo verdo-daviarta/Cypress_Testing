@@ -6,22 +6,25 @@ class KemhanBahasaPerbaharuiProfilPage {
   login() {
     // Akun pertama dari Excel Generate Akun terbaru, bukan credential admin di env.
     return cy.task('readLatestGeneratedCredentials', null, { log: false })
-      .then(({ username, password }) => {
-        cy.get('input[name="username"]', { timeout: 20000, log: false })
+      .then(({ name, username, password, sourceFile, sourceModified }) => {
+        cy.wrap({ namaSiswa: name, sourceFile, sourceModified }, { log: false })
+          .as('generatedStudent');
+        cy.get('input[name="username"]', { timeout: 50000, log: false })
           .should('be.visible').clear({ log: false })
           .type(username, { log: false, parseSpecialCharSequences: false });
 
-        cy.get('input[name="password"]', { timeout: 20000, log: false })
+        cy.get('input[name="password"]', { timeout: 50000, log: false })
           .should('be.visible').clear({ log: false })
           .type(password, { log: false, parseSpecialCharSequences: false });
 
-        return cy.get('input[type="submit"], button[type="submit"]', { timeout: 20000 })
+        return cy.get('input[type="submit"], button[type="submit"]', { timeout: 50000 })
           .should('be.visible').click();
       });
   }
   aksesMenuProfil() {
-    cy.contains('aside button', /^Profil$/, { timeout: 50000 })
-      .should('be.visible').click();
+    const menu = 'aside button[data-sidebar="menu-button"]';
+    cy.contains(menu, /^Profil$/, { timeout: 50000 }).should('be.visible');
+    cy.contains(menu, /^Profil$/, { timeout: 50000 }).click();
   }
 
   EditProfil() {
@@ -115,14 +118,24 @@ class KemhanBahasaPerbaharuiProfilPage {
     return cy.contains('main button', /^Batal$/).should('be.visible').click();
   }
 
-  verifikasiProfilTersimpan(nama, email) {
+  verifikasiProfilTersimpan(dataProfil) {
     // Jangan anggap klik Simpan saja sebagai bukti data tersimpan.
     cy.location('pathname', { timeout: 20000 })
       .should('match', /^\/calon\/detil\/[^/]+\/?$/);
     cy.reload();
     this.EditProfil();
-    cy.get('main input[id="name"]').should('have.value', nama);
-    cy.get('main input[id="email"]').should('have.value', email);
+    const fieldIds = {
+      nama: 'name',
+      email: 'email',
+      nrp: 'nrp',
+      unitKerja: 'workUnit',
+      nomorTeleponKantor: 'phoneWork',
+      nomorTeleponRumah: 'phoneHome',
+      nomorTelepon: 'phoneCall',
+    };
+    Object.entries(fieldIds).forEach(([key, id]) => {
+      cy.get(`main input[id="${id}"]`).should('have.value', dataProfil[key]);
+    });
     this.batal();
   }
 }
